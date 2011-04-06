@@ -13,8 +13,8 @@
 		if( isset( $_GET['referrer'] ) ) {
 			$uri = get_permalink( (int) $_GET['referrer'] );
 			if( !empty( $uri ) ) {
-				$uri.= '#' . longdesc_return_anchor( $id );
-				print '<p><a href="' . $uri . '">' . __( 'Return to article.', 'longdesc' ) . '</a></p>';
+				$uri.= '#' . longdesc_return_anchor( get_the_ID() );
+				print '<p><a href="' . esc_url( $uri ) . '">' .esc_html__( 'Return to article.', 'longdesc' ) . '</a></p>';
 			}
 		}
 	?>
