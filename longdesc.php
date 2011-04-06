@@ -1,12 +1,12 @@
 <?php
 /*
-Plugin Name: Long Description
-Version: 1.1
-Author: Michael Fields
-Author URI: http://wordpress.mfields.org/
-License: GPLv2
+Plugin Name:       Long Description
+Version:           1.1
+Author:            Michael Fields
+Author URI:        http://wordpress.mfields.org/
+License:           GPLv2
 
-Copyright 2010  Michael Fields  michael@mfields.org
+Copyright 2010-2011  Michael Fields  michael@mfields.org
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License version 2 as published by
@@ -29,37 +29,73 @@ load_plugin_textdomain( 'longdesc', false, dirname( plugin_basename( __FILE__ ) 
  * The directory where the longdesc plug-in is installed.
  * @since 2010-09-26
  */
-define( 'LONGDESC_DIR', dirname( __FILE__ ) . '/' );
+define( 'LONGDESC_DIR', trailingslashit( dirname( __FILE__ ) ) );
 
 
 /**
- * Generate a html document that displays only post_content.
- * @uses $_GET['id'] int post ID.
- * @return void.
- * @since 2010-09-26
+ * Load Template.
+ *
+ * The ID for an image attachment is expected to be
+ * passed via $_GET['longdesc']. If this value exists
+ * and a post is successfully queried, postdata will
+ * be prepared and a template will be loaded to display
+ * the post content.
+ *
+ * This template must be named "longdesc-template.php".
+ *
+ * First, this function will look in the child theme
+ * then in the parent theme and if no template is found
+ * in either theme, the default template will be loaded
+ * from the plugin's folder.
+ *
+ * This function is hooked into the "template_redirect"
+ * action and terminates script execution.
+ *
+ * @return    void
+ *
+ * @since     2010-09-26
+ * @alter     2011-03-27
  */
 function longdesc_template() {
-	if( isset( $_GET['longdesc'] ) ) {
-		global $post;
-		$content = '';
-		$id = (int) abs( $_GET['longdesc'] );
-		$post = get_post( $id );
-		if( isset( $post->post_content ) ) {
-			remove_filter( 'the_content', 'prepend_attachment' );
-			setup_postdata( $post );
-			$template = locate_template( array( 'longdesc-template.php' ) );
-			if( !empty( $template ) ) {
-				require_once( $template );
-			}
-			else {
-				require_once( LONGDESC_DIR . 'longdesc-template.php' );
-			}
-		}
-		else {
-			header( 'HTTP/1.0 404 Not Found' );
-		}
+	
+	/* Return early if there is no reason to proceed. */
+	if ( ! isset( $_GET['longdesc'] ) ) {
+		return;
+	}
+
+	global $post;
+
+	/* Get the image attachment's data. */
+	$id = absint( $_GET['longdesc'] );
+	$post = get_post( $id );
+	if ( is_object( $post ) ) {
+		setup_postdata( $post );
+	}
+
+	/* Attachment must be an image. */
+	if ( false === strpos( get_post_mime_type(), 'image' ) ) {
+		header( 'HTTP/1.0 404 Not Found' );
 		exit;
 	}
+
+	/* The whole point here is to NOT show an image :) */
+	remove_filter( 'the_content', 'prepend_attachment' );
+
+	/* Check to see if there is a template in the theme. */
+	$template = locate_template( array( 'longdesc-template.php' ) );
+	if ( ! empty( $template ) ) {
+		require_once( $template );
+		exit;
+	}
+	/* Use plugin's template file. */
+	else {
+		require_once( LONGDESC_DIR . 'longdesc-template.php' );
+		exit;
+	}
+
+	/* You've gone too far! */
+	header( 'HTTP/1.0 404 Not Found' );
+	exit;
 }
 add_action( 'template_redirect', 'longdesc_template' );
 
