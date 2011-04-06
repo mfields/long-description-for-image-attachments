@@ -3,8 +3,8 @@ Long Description
 Contributors: mfields
 Donate link: http://mfields.org/donate/
 Tags: longdesc, long description, media, image, accessibility, WAI, a11y, screen reader
-Requires at least: 3.0.1
-Tested up to: 3.0.1
+Requires at least: 3.1
+Tested up to: 3.1
 Stable tag: trunk
 
 Automatically adds a longdesc attribute to your images when you insert them into the post body if a description has been written.
@@ -15,6 +15,10 @@ Automatically adds a longdesc attribute to your images when you insert them into
 You can create a custom template in your theme's folder to further style the Long Description page. I would suggest creating a copy of the longdesc-template.php file from this plugin in your active theme (or child theme) and reworking it to fit your needs.
 
 ==Changelog==
+
+= 1.2 =
+* Refactor most of the code.
+* Escape all output.
 
 = 1.1 =
 * load_plugin_textdomain() added.
