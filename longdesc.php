@@ -101,11 +101,15 @@ add_action( 'template_redirect', 'longdesc_template' );
 
 
 /**
+ * Anchor.
+ *
  * Create anchor id for linking from a Long Description to referring post.
  * Also creates an anchor to return from Long Description page.
- * @param int ID of the post which contains an image with a longdesc attribute.
- * @return string
- * @since 2010-09-26
+ *
+ * @param     int       ID of the post which contains an image with a longdesc attribute.
+ * @return    string
+ *
+ * @since     2010-09-26
  */
 function longdesc_return_anchor( $id ) {
 	return 'longdesc-return-' . $id;
@@ -113,26 +117,33 @@ function longdesc_return_anchor( $id ) {
 
 
 /**
+ * Add Attribute.
+ *
  * Add longdesc attribute when WordPress sends image to the editor.
  * Also creates an anchor to return from Long Description page.
- * @uses longdesc_return_anchor()
- * @return string
- * @since 2010-09-20
- * @alter 2010-09-26
+ *
+ * @return    string
+ *
+ * @since     2010-09-20
+ * @alter     2011-04-06
  */
 function longdesc_add_attr( $html, $id, $caption, $title, $align, $url, $size, $alt ) {
-	$id = (int) $id;
-	$args = array( 'longdesc' => $id );
-	if( isset( $_GET['post_id'] ) ) {
-		$args['referrer'] = (int) $_GET['post_id'];
-	}
-	$url = add_query_arg( $args, home_url() );
-	$post = get_post( $id );
-	if( isset( $post->post_content ) && !empty( $post->post_content ) ) {
+
+	/* Get data for the image attachment. */
+	$image = get_post( $id );
+
+	if ( isset( $image->ID ) && !empty( $image->ID ) ) {
+		$args = array( 'longdesc' => $image->ID );
+		/* The referrer is the post that the image is inserted into. */
+		if ( isset( $_GET['post_id'] ) ) {
+			$args['referrer'] = (int) $_GET['post_id'];
+		}
 		$search = 'title="' . $title . '"';
-		$replace = $search . ' longdesc="' . $url . '"';
-		return str_replace( $search, $replace, $html ) . '<a id="' . longdesc_return_anchor( $id ) . '"></a>';
+		$replace = $search . ' longdesc="' . esc_url( add_query_arg( $args, home_url() ) ) . '"';
+		$html = str_replace( $search, $replace, $html );
+		$html.= '<a id="' . esc_attr( longdesc_return_anchor( $image->ID ) ) . '"></a>';
 	}
+
 	return $html;
 }
 add_filter( 'image_send_to_editor', 'longdesc_add_attr', 10, 8 );
@@ -141,4 +152,3 @@ add_filter( 'image_send_to_editor', 'longdesc_add_attr', 10, 8 );
 /* Backward compatibility with previous versions. */
 add_action( 'wp_ajax_longdesc', 'longdesc' );
 add_action( 'wp_ajax_nopriv_longdesc', 'longdesc' );
-?>
