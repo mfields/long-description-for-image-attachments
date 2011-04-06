@@ -1,7 +1,8 @@
 <?php
 /*
 Plugin Name:       Long Description
-Version:           1.1
+Description:       Automatically adds a londesc attribute to images when inserting into post content with the media uploader.
+Version:           1.2
 Author:            Michael Fields
 Author URI:        http://wordpress.mfields.org/
 License:           GPLv2
